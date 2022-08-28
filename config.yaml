@@ -1,0 +1,49 @@
+application:
+  host: "0.0.0.0"
+  port: 8000
+  readTimeout: 120s
+  writeTimeout: 120s
+client:
+  timeout: 30s
+  retryCount: 3
+  retrySleepTime: 5s
+log:
+  level: "info"
+  dir: "./log"
+  rotate:
+    # MB
+    maxSize: 10
+    maxBackups: 10
+webhooks:
+  dingtalk-from-sentry-aimfulbbmldb:
+    url: "https://oapi.dingtalk.com/robot/send?access_token=a4f25de814007acfb29ce6713ee2a893260feec55c00025a9b281961ef86c63c"
+    method: "POST"
+    query:
+      - name: "s1"
+        value: "z {{ .ss }} {{.ss1}}z"
+      - name: "s2"
+        value: "z{{.ss1}}z"
+    header:
+      - name: "s1"
+        value: "z {{ .ss }} z"
+      - name: "s2"
+        value: "z{{.ss1}}z"
+    vars:
+      ss:
+        key: "sss.www.www"
+        value: "default"
+        from: "Body"
+      ss1:
+        key: "qqq2"
+        value: "default"
+        from: "Query"
+      ss12:
+        key: "Content-Type"
+        value: "default"
+        from: "Header"
+    body:
+      msgtype: "text"
+      text:
+        content: "error: 嘿嘿嘿～ template: ss1: {{.ss1}} ss: {{.ss}}"
+
+
