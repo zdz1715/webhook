@@ -8,42 +8,44 @@ client:
   retryCount: 3
   retrySleepTime: 5s
 log:
-  level: "info"
-  dir: "./log"
+  dir: "E:\\fly\\my-git\\webhook\\log"
   rotate:
     # MB
     maxSize: 10
     maxBackups: 10
 webhooks:
   dingtalk-from-sentry-aimfulbbmldb:
-    url: "https://oapi.dingtalk.com/robot/send?access_token=a4f25de814007acfb29ce6713ee2a893260feec55c00025a9b281961ef86c63c"
+    url: "http://11sss"
     method: "POST"
+    # default: application/json
+    contentType: application/json
     query:
-      - name: "s1"
-        value: "z {{ .ss }} {{.ss1}}z"
-      - name: "s2"
-        value: "z{{.ss1}}z"
+      - name: "ipByQuery"
+        value: "{{ .ip_by_query }}"
+      - name: "ipByBody"
+        value: "{{ .ip_by_body }}"
     header:
-      - name: "s1"
-        value: "z {{ .ss }} z"
-      - name: "s2"
-        value: "z{{.ss1}}z"
+      - name: "ipByQuery"
+        value: "{{ .ip_by_query }}"
+      - name: "ipByBody"
+        value: "{{ .ip_by_body }}"
+    # not support case sensitive keys: docs: https://github.com/spf13/viper#does-viper-support-case-sensitive-keys
+    # varFrom: Query, Body, Header, Value. default: Value
     vars:
-      ss:
-        key: "sss.www.www"
-        value: "default"
+      ip_by_body:
+        key: "client.ip"
         from: "Body"
-      ss1:
-        key: "qqq2"
+      ip_by_query:
+        key: "ip"
         value: "default"
         from: "Query"
-      ss12:
+      content_by_header:
         key: "Content-Type"
         value: "default"
         from: "Header"
     body:
       msgtype: "text"
       text:
-        content: "error: 嘿嘿嘿～ template: ss1: {{.ss1}} ss: {{.ss}}"
+        content: "error: template: ipByQuery: {{ .ip_by_query }} ipByBody: {{ .ip_by_body }}"
 
 

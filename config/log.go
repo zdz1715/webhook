@@ -1,7 +1,6 @@
 package config
 
 type Log struct {
-	Level  string    `yaml:"level"`
 	DIR    string    `yaml:"dir"`
 	Rotate LogRotate `yaml:"rotate"`
 }

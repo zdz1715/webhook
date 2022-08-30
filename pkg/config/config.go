@@ -29,7 +29,7 @@ func (c *Config) SetWatch(b bool) {
 // Load
 // path if empty, get the default from the command line argument: --config
 func (c *Config) Load(path string) (*viper.Viper, error) {
-	fmt.Printf("[CONFIG] --load path: %s \n", path)
+	fmt.Printf("[CONFIG] load path: %s \n", path)
 	c.Driver.SetConfigFile(path)
 	// viper源码不指定文件格式的话，接下来会有多次获取文件格式，为了效率，这里指定下
 	ext := filepath.Ext(path)
@@ -46,9 +46,9 @@ func (c *Config) Load(path string) (*viper.Viper, error) {
 		c.Driver.OnConfigChange(func(in fsnotify.Event) {
 			readAgainErr := c.Driver.ReadInConfig()
 			if readAgainErr != nil {
-				fmt.Printf("[CONFIG] --watch %s msg: Read again. error: %s \n", in, readAgainErr.Error())
+				fmt.Printf("[CONFIG] watch %s msg: Read again. error: %s \n", in, readAgainErr.Error())
 			} else {
-				fmt.Printf("[CONFIG] --watch %s msg: Read again. \n", in)
+				fmt.Printf("[CONFIG] watch %s msg: Read again. \n", in)
 			}
 		})
 
@@ -62,9 +62,9 @@ func (c *Config) Unmarshal(rawVal interface{}, opts ...viper.DecoderConfigOption
 	if c.watch {
 		c.Driver.OnConfigChange(func(in fsnotify.Event) {
 			if err := c.Driver.Unmarshal(rawVal, opts...); err != nil {
-				fmt.Printf("[config] --watch %s msg: Unmarshal again. error: %s \n", in, err.Error())
+				fmt.Printf("[config] watch %s msg: Unmarshal again. error: %s \n", in, err.Error())
 			} else {
-				fmt.Printf("[config] --watch %s msg: Unmarshal again. \n", in)
+				fmt.Printf("[config] watch %s msg: Unmarshal again. \n", in)
 			}
 		})
 	}

@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/spf13/pflag"
-	"github.com/zdz1715/webhook/library/config"
+	"github.com/zdz1715/webhook/pkg/config"
 	"time"
 )
 
@@ -18,6 +18,7 @@ var (
 	path string
 )
 
+// TODO: 增加超时重试功能
 func init() {
 	// main.go pflag.Parse()
 	pflag.StringVarP(&path, "config", "c", "config.yaml", "choose config file.")
@@ -50,8 +51,16 @@ func defaultConfig(cfg *Config) *Config {
 		WriteTimeout: 120 * time.Second,
 	}
 	cfg.Client = Client{
-		Timeout:    30 * time.Second,
-		RetryCount: 3,
+		Timeout: 30 * time.Second,
+		//RetryCount: 3,
+	}
+
+	cfg.Log = Log{
+		DIR: "./logs",
+		Rotate: LogRotate{
+			MaxSize:    0,
+			MaxBackups: 0,
+		},
 	}
 
 	return cfg

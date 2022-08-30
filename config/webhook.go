@@ -24,7 +24,6 @@ const (
 	WebhookVarFromQuery  = "Query"
 	WebhookVarFromBody   = "Body"
 	WebhookVarFromHeader = "Header"
-	WebhookVarFromValue  = "Value"
 )
 
 //var WebhookVarFrom map[string]struct{} = map[string]struct{}{
