@@ -14,7 +14,7 @@
 
 ```
 
-### k8s
+### kubernetes
 
 ```yaml
 
