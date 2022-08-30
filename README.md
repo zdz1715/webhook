@@ -1,20 +1,27 @@
 # webhook
-自定义消息格式的webhook中转站程序
+通过一个配置文件启动一个webhook转发程序
 
-## 构建
-### 1. 拉取代码并配置构建参数
-```shell
-git clone https://github.com/zdz1715/webhook.git
-cd ./webhook
+## 配置参考
+[config.yaml.example](config.yaml.example)
+
+## 使用方式
+### 二进制
+1. 下载二进制包
+2. 运行
+
+### docker-compose
+```yaml
+
 ```
 
-### 2. 构建镜像
+### k8s
 
-```shell
-make image
+```yaml
+
 ```
 
-## 使用
+
+
 
 
 

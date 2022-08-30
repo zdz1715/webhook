@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-IMG_REGISTRY ?= webhook
+IMG_REGISTRY ?= zdzserver/webhook
 
 # Build binary
 BUILD_ROOT = "./bin"

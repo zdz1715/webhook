@@ -1,37 +1,36 @@
+# App start option
 application:
-  host: "0.0.0.0"
-  port: 8000
-  readTimeout: 60s
-  writeTimeout: 60s
+  host: "0.0.0.0" # listen host
+  port: 8000 # listen port
+  readTimeout: 60s # http read timeout, default: 120s
+  writeTimeout: 60s # http write timeout, default: 120s
+# Forwarding client
 client:
-  # Forwarding timeout. default: 30s
-  timeout: 30s
+  timeout: 30s # Forwarding timeout. default: 30s
+# log option
 log:
-  dir: "./log"
-  rotate:
+  dir: "./log" # log dir
+  rotate: # log rotate
     # maxSize and maxBackups = 0, File permanent saving
-    maxSize: 0 # MB
-    maxBackups: 0
+    maxSize: 0 # MB, single file max size
+    maxBackups: 0 # file max backups
+# webhooks
 webhooks:
-  dingtalk-from-sentry-aimfulbbmldb:
-    url: "
-    "
-    method: "POST"
-    # default: application/json
-    contentType: application/json
-    query:
-      - name: "ipByQuery"
-        value: "{{ .ip_by_query }}"
-      - name: "ipByBody"
-        value: "{{ .ip_by_body }}"
-    header:
-      - name: "ipByQuery"
-        value: "{{ .ip_by_query }}"
-      - name: "ipByBody"
-        value: "{{ .ip_by_body }}"
-    # not support case sensitive keys: docs: https://github.com/spf13/viper#does-viper-support-case-sensitive-keys
+  dingtalk-from-sentry-aimfulbbmldb: # webhook unique name
+    url: "" # url, eg: https://oapi.dingtalk.com/robot/send?access_token=xxx
+    contentType: application/json # default: application/json
+#    query: # add query param
+#      - name: "ipByQuery"
+#        value: "{{ .ip_by_query }}"
+#      - name: "ipByBody"
+#        value: "{{ .ip_by_body }}"
+#    header: # add header
+#      - name: "ipByQuery"
+#        value: "{{ .ip_by_query }}" # vars.ip_by_query
+#      - name: "ipByBody"
+#        value: "{{ .ip_by_body }}"
     # varFrom: Query, Body, Header, Value. default: Value
-    vars:
+    vars: # not support case sensitive keys: docs: https://github.com/spf13/viper#does-viper-support-case-sensitive-keys
       ip_by_body:
         key: "client.ip"
         from: "Body"
