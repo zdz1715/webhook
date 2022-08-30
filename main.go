@@ -39,7 +39,7 @@ func main() {
 
 	log.Info().Msgf("root: %s, listen: %s:%d", util.GetExecRootDir(), cfg.Application.Host, cfg.Application.Port)
 
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Info().Msg("Shutting down server...")

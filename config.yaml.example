@@ -1,21 +1,21 @@
 application:
   host: "0.0.0.0"
   port: 8000
-  readTimeout: 120s
-  writeTimeout: 120s
+  readTimeout: 60s
+  writeTimeout: 60s
 client:
+  # Forwarding timeout. default: 30s
   timeout: 30s
-  retryCount: 3
-  retrySleepTime: 5s
 log:
-  dir: "E:\\fly\\my-git\\webhook\\log"
+  dir: "./log"
   rotate:
-    # MB
-    maxSize: 10
-    maxBackups: 10
+    # maxSize and maxBackups = 0, File permanent saving
+    maxSize: 0 # MB
+    maxBackups: 0
 webhooks:
   dingtalk-from-sentry-aimfulbbmldb:
-    url: "http://11sss"
+    url: "
+    "
     method: "POST"
     # default: application/json
     contentType: application/json
