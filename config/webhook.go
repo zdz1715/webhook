@@ -10,14 +10,19 @@ type KV struct {
 }
 
 type Webhook struct {
-	URL         string                 `yaml:"url"`
-	Method      string                 `yaml:"method"`
-	ContentType string                 `yaml:"contentType"`
-	Header      []KV                   `yaml:"header"`
-	Body        map[string]interface{} `yaml:"body"`
-	Query       []KV                   `yaml:"query"`
-	Vars        map[string]WebhookVar  `yaml:"varsFrom"`
-	Client      *Client                `yaml:"client"`
+	URL         string                `yaml:"url"`
+	Method      string                `yaml:"method"`
+	ContentType string                `yaml:"contentType"`
+	Header      []KV                  `yaml:"header"`
+	Body        WebhookBody           `yaml:"body"`
+	Query       []KV                  `yaml:"query"`
+	Vars        map[string]WebhookVar `yaml:"varsFrom"`
+	Client      *Client               `yaml:"client"`
+}
+
+type WebhookBody struct {
+	Form map[string]string `yaml:"form"`
+	Json string            `json:"json"`
 }
 
 const (

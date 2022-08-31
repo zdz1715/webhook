@@ -11,6 +11,18 @@ const (
 
 var WebhookContentTypeList = []string{JsonContentType, FormContentType}
 
+func ValidateContentType(contentType string) bool {
+	if contentType == "" {
+		return false
+	}
+	for _, v := range WebhookContentTypeList {
+		if v == contentType {
+			return true
+		}
+	}
+	return false
+}
+
 // HttpClient client
 var HttpClient = &http.Client{
 	//Timeout: 30 * time.Second,

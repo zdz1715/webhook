@@ -15,36 +15,31 @@ log:
     maxSize: 0 # MB, single file max size
     maxBackups: 0 # file max backups
 # webhooks
+## template docs: https://pkg.go.dev/text/template
 webhooks:
   dingtalk-from-sentry-aimfulbbmldb: # webhook unique name
-    url: "" # url, eg: https://oapi.dingtalk.com/robot/send?access_token=xxx
+    url: "https://oapi.dingtalk.com/robot/send?access_token=4a4e9c942b8b6032b0c2dd54d373a720ad2bb8fac18b1bdb32a43a119b6655d9" # url, eg: https://oapi.dingtalk.com/robot/send?access_token=xxx
+    method: POST
     contentType: application/json # default: application/json
-#    query: # add query param
-#      - name: "ipByQuery"
-#        value: "{{ .ip_by_query }}"
-#      - name: "ipByBody"
-#        value: "{{ .ip_by_body }}"
-#    header: # add header
-#      - name: "ipByQuery"
-#        value: "{{ .ip_by_query }}" # vars.ip_by_query
-#      - name: "ipByBody"
-#        value: "{{ .ip_by_body }}"
+    #    query: # add query param
+    #      - name: "ipByQuery"
+    #        value: "{{ .ip_by_query }}"
+    #      - name: "ipByBody"
+    #        value: "{{ .ip_by_body }}"
+    #    header: # add header
+    #      - name: "ipByQuery"
+    #        value: "{{ .ip_by_query }}" # vars.ip_by_query
+    #      - name: "ipByBody"
+    #        value: "{{ .ip_by_body }}"
     # varFrom: Query, Body, Header, Value. default: Value
     vars: # not support case sensitive keys: docs: https://github.com/spf13/viper#does-viper-support-case-sensitive-keys
-      ip_by_body:
-        key: "client.ip"
+      project:
+        key: "project"
         from: "Body"
-      ip_by_query:
-        key: "ip"
-        value: "default"
-        from: "Query"
-      content_by_header:
-        key: "Content-Type"
-        value: "default"
-        from: "Header"
+      event:
+        key: "event"
+        from: "Body"
     body:
-      msgtype: "text"
-      text:
-        content: "error: template: ipByQuery: {{ .ip_by_query }} ipByBody: {{ .ip_by_body }}"
+      json: '{"msgtype":"text","text":{"content":{"json": {{ .project | toJson }} }}}'
 
 

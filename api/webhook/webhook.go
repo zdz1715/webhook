@@ -1,26 +1,22 @@
 package webhook
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/thedevsaddam/gojsonq/v2"
 	"github.com/zdz1715/webhook/config"
 	"github.com/zdz1715/webhook/global"
 	"github.com/zdz1715/webhook/middleware"
+	"github.com/zdz1715/webhook/pkg/engine"
 	"github.com/zdz1715/webhook/pkg/util"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-	"text/template"
 )
-
-type varsOnBind = map[string]interface{}
 
 type RespInfo struct {
 	Status       string      `json:"status"`
@@ -67,13 +63,21 @@ func Handle(c *gin.Context) {
 		webhook.ContentType = util.JsonContentType
 	}
 
+	if !util.ValidateContentType(webhook.ContentType) {
+		msg := fmt.Sprintf("%s.contentType is unsupported: %s, Supported list: %v", name, webhook.ContentType,
+			util.WebhookContentTypeList)
+		loggerError.Msg(msg)
+		c.JSON(http.StatusOK, &util.Response{Code: http.StatusBadRequest, Message: msg})
+		return
+	}
+
 	reqBody, _ := c.GetRawData()
 
 	vars := bindVars(&webhook, c, reqBody)
 
 	loggerInfo = loggerInfo.Interface("vars", vars)
 
-	strBody, body, err := makeBody(c, &webhook, vars, uuid)
+	strBody, body, err := makeBody(c, &webhook, vars)
 	if err != nil {
 		loggerError.Msg(err.Error())
 		c.JSON(http.StatusOK, &util.Response{Code: http.StatusBadRequest, Message: err.Error()})
@@ -146,39 +150,48 @@ func sendRequest(req *http.Request, client *config.Client) (*RespInfo, error) {
 	}, nil
 }
 
-func makeBody(c *gin.Context, webhook *config.Webhook, bind varsOnBind, uuid string) (string, io.Reader, error) {
+func parseVarString(c *gin.Context, text string, vars engine.Vars) string {
+	v, err := global.Engine.Render(text, vars)
+	if err != nil {
+		_ = c.Error(err)
+		return text
+	}
+	return v
+}
+
+func makeBody(c *gin.Context, webhook *config.Webhook, vars engine.Vars) (string, io.Reader, error) {
 	var (
 		reqBody io.Reader
 		strBody string
 	)
-	if len(webhook.Body) > 0 {
-		switch webhook.ContentType {
-		case util.JsonContentType:
-			//parseBody := parseVarString(webhook.Body, bind)
-			jsonBody, err := json.Marshal(webhook.Body)
-			if err != nil {
-				return strBody, reqBody, err
-			}
-			strBody = parseVarString(string(jsonBody), bind)
-			reqBody = strings.NewReader(strBody)
-		case util.FormContentType:
+	fmt.Println(webhook.Body)
+	switch webhook.ContentType {
+	case util.FormContentType:
+		if len(webhook.Body.Form) > 0 {
 			postForm := url.Values{}
-			//for k, v := range webhook.Body {
-			//	if vStr, ok := v.(string); ok {
-			//		postForm.Add(k, parseVarString(vStr, bind))
-			//	}
-			//}
+			for k, v := range webhook.Body.Form {
+				postForm.Add(k, parseVarString(c, v, vars))
+			}
 			strBody = postForm.Encode()
 			reqBody = strings.NewReader(strBody)
-		default:
-			return strBody, reqBody, errors.New(fmt.Sprintf("webhook/%s.contentType is unsupported: %s, Supported list: %v",
-				uuid, webhook.ContentType, util.WebhookContentTypeList))
+		}
+	case util.JsonContentType:
+		if len(webhook.Body.Json) > 0 {
+			fmt.Println("json----", webhook.Body.Json)
+			strBody = parseVarString(c, webhook.Body.Json, vars)
+			fmt.Println("json parse----", strBody)
+			var jsonObj interface{}
+			err := json.Unmarshal([]byte(strBody), &jsonObj)
+			if err != nil {
+				return strBody, reqBody, fmt.Errorf("body.json unmarshal failed: %s", err.Error())
+			}
+			reqBody = strings.NewReader(strBody)
 		}
 	}
 	return strBody, reqBody, nil
 }
 
-func makeRequest(body io.Reader, c *gin.Context, webhook *config.Webhook, bind varsOnBind) (*http.Request, error) {
+func makeRequest(body io.Reader, c *gin.Context, webhook *config.Webhook, vars engine.Vars) (*http.Request, error) {
 
 	req, err := http.NewRequest(webhook.Method, webhook.URL, body)
 	if err != nil {
@@ -187,14 +200,14 @@ func makeRequest(body io.Reader, c *gin.Context, webhook *config.Webhook, bind v
 
 	// add header
 	for _, headerKV := range webhook.Header {
-		req.Header.Add(headerKV.Name, parseVarString(headerKV.Value, bind))
+		req.Header.Add(headerKV.Name, parseVarString(c, headerKV.Value, vars))
 	}
 
 	// add query
 	if len(webhook.Query) > 0 {
 		q := req.URL.Query()
 		for _, queryKV := range webhook.Query {
-			q.Add(queryKV.Name, parseVarString(queryKV.Value, bind))
+			q.Add(queryKV.Name, parseVarString(c, queryKV.Value, vars))
 		}
 		req.URL.RawQuery = q.Encode()
 	}
@@ -204,23 +217,8 @@ func makeRequest(body io.Reader, c *gin.Context, webhook *config.Webhook, bind v
 	return req, nil
 }
 
-func parseVarString(text string, data varsOnBind) string {
-	fmt.Println(text)
-	t, err := template.New("").Parse(text)
-	if err != nil {
-		return text
-	}
-	var buf bytes.Buffer
-
-	err = t.Execute(&buf, data)
-	if err != nil {
-		return text
-	}
-	return buf.String()
-}
-
-func bindVars(webhook *config.Webhook, c *gin.Context, body []byte) varsOnBind {
-	data := make(varsOnBind, len(webhook.Vars))
+func bindVars(webhook *config.Webhook, c *gin.Context, body []byte) engine.Vars {
+	data := make(engine.Vars, len(webhook.Vars))
 	bodyStr := string(body)
 	for name, v := range webhook.Vars {
 		nameTrim := strings.TrimSpace(name)
