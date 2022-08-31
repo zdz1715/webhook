@@ -67,7 +67,9 @@ func Handle(c *gin.Context) {
 		webhook.ContentType = util.JsonContentType
 	}
 
-	vars := bindVars(&webhook, c)
+	reqBody, _ := c.GetRawData()
+
+	vars := bindVars(&webhook, c, reqBody)
 
 	loggerInfo = loggerInfo.Interface("vars", vars)
 
@@ -102,7 +104,6 @@ func Handle(c *gin.Context) {
 	if webhook.Client != nil && webhook.Client.Timeout > 0 {
 		clientConfig.Timeout = webhook.Client.Timeout
 	}
-
 	respInfo, err := sendRequest(req, clientConfig)
 
 	if err != nil {
@@ -153,6 +154,7 @@ func makeBody(c *gin.Context, webhook *config.Webhook, bind varsOnBind, uuid str
 	if len(webhook.Body) > 0 {
 		switch webhook.ContentType {
 		case util.JsonContentType:
+			//parseBody := parseVarString(webhook.Body, bind)
 			jsonBody, err := json.Marshal(webhook.Body)
 			if err != nil {
 				return strBody, reqBody, err
@@ -161,11 +163,11 @@ func makeBody(c *gin.Context, webhook *config.Webhook, bind varsOnBind, uuid str
 			reqBody = strings.NewReader(strBody)
 		case util.FormContentType:
 			postForm := url.Values{}
-			for k, v := range webhook.Body {
-				if vStr, ok := v.(string); ok {
-					postForm.Add(k, parseVarString(vStr, bind))
-				}
-			}
+			//for k, v := range webhook.Body {
+			//	if vStr, ok := v.(string); ok {
+			//		postForm.Add(k, parseVarString(vStr, bind))
+			//	}
+			//}
 			strBody = postForm.Encode()
 			reqBody = strings.NewReader(strBody)
 		default:
@@ -203,6 +205,7 @@ func makeRequest(body io.Reader, c *gin.Context, webhook *config.Webhook, bind v
 }
 
 func parseVarString(text string, data varsOnBind) string {
+	fmt.Println(text)
 	t, err := template.New("").Parse(text)
 	if err != nil {
 		return text
@@ -216,27 +219,30 @@ func parseVarString(text string, data varsOnBind) string {
 	return buf.String()
 }
 
-func bindVars(webhook *config.Webhook, c *gin.Context) varsOnBind {
+func bindVars(webhook *config.Webhook, c *gin.Context, body []byte) varsOnBind {
 	data := make(varsOnBind, len(webhook.Vars))
+	bodyStr := string(body)
 	for name, v := range webhook.Vars {
-		data[name] = v.Value
+		nameTrim := strings.TrimSpace(name)
+		data[nameTrim] = v.Value
 
 		if len(v.Key) == 0 {
 			continue
 		}
 
+		key := strings.TrimSpace(v.Key)
+
 		switch v.From {
 		case config.WebhookVarFromQuery:
-			data[name] = c.Query(v.Key)
+			data[nameTrim] = c.Query(key)
 		case config.WebhookVarFromHeader:
-			data[name] = c.GetHeader(v.Key)
+			data[nameTrim] = c.GetHeader(key)
 		case config.WebhookVarFromBody:
 			switch c.ContentType() {
 			case util.JsonContentType:
-				d, _ := c.GetRawData()
-				data[name] = gojsonq.New().FromString(string(d)).Find(v.Key)
+				data[nameTrim] = gojsonq.New().FromString(bodyStr).Find(key)
 			default:
-				data[name] = c.PostForm(v.Key)
+				data[nameTrim] = c.PostForm(key)
 			}
 		}
 	}

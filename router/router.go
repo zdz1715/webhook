@@ -22,9 +22,10 @@ func Init() *gin.Engine {
 	webhookLogPath := path.Join(cfg.Log.DIR, "webhook_reply.log")
 
 	global.AccessLogger = util.NewMultiLevelWriter(
-		util.NewLogRotate(accessLogPath, cfg.Log.Rotate.MaxSize, cfg.Log.Rotate.MaxBackups),
+		util.NewRotate(accessLogPath, cfg.Log.Rotate.MaxSize, cfg.Log.Rotate.MaxBackups),
 		os.Stdout,
 	)
+
 	global.WebhookLogger = util.NewLogRotate(webhookLogPath, cfg.Log.Rotate.MaxSize, cfg.Log.Rotate.MaxBackups)
 
 	errorLog := util.NewRotate(errorLogPath, cfg.Log.Rotate.MaxSize, cfg.Log.Rotate.MaxBackups)
