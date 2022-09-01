@@ -21,25 +21,23 @@ webhooks:
     url: "https://oapi.dingtalk.com/robot/send?access_token=4a4e9c942b8b6032b0c2dd54d373a720ad2bb8fac18b1bdb32a43a119b6655d9" # url, eg: https://oapi.dingtalk.com/robot/send?access_token=xxx
     method: POST
     contentType: application/json # default: application/json
-    #    query: # add query param
-    #      - name: "ipByQuery"
-    #        value: "{{ .ip_by_query }}"
-    #      - name: "ipByBody"
-    #        value: "{{ .ip_by_body }}"
-    #    header: # add header
-    #      - name: "ipByQuery"
-    #        value: "{{ .ip_by_query }}" # vars.ip_by_query
-    #      - name: "ipByBody"
-    #        value: "{{ .ip_by_body }}"
-    # varFrom: Query, Body, Header, Value. default: Value
+    query: # add query param
+#      - name: "project"
+#        value: "project is {{ .project }}"
+#    header: # add header
+#      - name: "x-sentry-project"
+#        value: "{{ .project }}"
+    # var.*.from: Query, Body, Header, Value. default: Value
     vars: # not support case sensitive keys: docs: https://github.com/spf13/viper#does-viper-support-case-sensitive-keys
       project:
         key: "project"
         from: "Body"
-      event:
-        key: "event"
-        from: "Body"
+#      event:
+#        key: "event"
+#        from: "Body"
     body:
-      json: '{"msgtype":"text","text":{"content":{"json": {{ .project | toJson }} }}}'
-      form: {}
+      json: '{"msgtype":"text","text":{"content": "json: {{ . | toJson }} " }}}'
+#      form:
+#        key1: value1
+#        key2: value2
 
