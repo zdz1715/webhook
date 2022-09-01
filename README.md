@@ -20,6 +20,10 @@
 
 ```
 
+## 自定义消息格式
+模版参考：https://pkg.go.dev/text/template
+
+支持函数：https://masterminds.github.io/sprig/
 
 
 

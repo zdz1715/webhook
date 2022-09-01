@@ -41,5 +41,5 @@ webhooks:
         from: "Body"
     body:
       json: '{"msgtype":"text","text":{"content":{"json": {{ .project | toJson }} }}}'
-
+      form: {}
 
