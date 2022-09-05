@@ -5,6 +5,7 @@
 [config.yaml.example](config.yaml.example)
 
 ## 使用方式
+> 没有鉴权方式，推荐内网使用
 ### 二进制
 1. 从[release](https://github.com/zdz1715/webhook/releases)下载二进制包
 2. 解压运行
@@ -23,6 +24,9 @@ services:
     container_name: webhook
     ports:
       - "8000:8000"
+    command:
+      - -c
+      - /user/local/webhook/config/config.yaml
     volumes:
       - ./config/config.yaml:/user/local/webhook/config/config.yaml
     networks:
