@@ -2,7 +2,7 @@
 IMG_REGISTRY ?= zdzserver/webhook
 
 # Build binary
-BUILD_ROOT = "./bin"
+BUILD_ROOT = ./bin
 
 GOOS ?= linux
 GOARCH ?= $(shell go env GOARCH)
@@ -48,7 +48,7 @@ ifeq ($(VERSION), "")
     LATEST_TAG=$(GIT_TAG)
     ifeq ($(LATEST_TAG),)
         # Forked repo may not sync tags from upstream, so give it a default tag to make CI happy.
-        VERSION="unknown"
+        VERSION=unknown
     else
         VERSION=$(LATEST_TAG)
     endif
@@ -90,18 +90,21 @@ vet: ## Run go vet against code.
 
 
 .PHONY: build
-build: fmt vet webhook ## Build binary.
+build: fmt vet webhook tar-webhook ## Build binary.
 
 .PHONY: clean
 clean: ## Clean binary.
 	rm -rf  $(BUILD_ROOT)/*
 
 .PHONY: webhook
-webhook: $(SRC)
-	CGO_ENABLED=0 GOOS=$(GOOS) go build \
+webhook: $(SRC) clean
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
 		-ldflags "$(LDFLAGS)" \
 		-o $(BUILD_ROOT)/webhook \
 		main.go
+
+tar-webhook:
+	tar -zcvf $(BUILD_ROOT)/webhook-$(GOOS)-$(GOARCH)-$(VERSION).tar.gz $(BUILD_ROOT)/webhook
 
 .PHONY: image
 image: build ## build image
