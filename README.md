@@ -6,12 +6,29 @@
 
 ## 使用方式
 ### 二进制
-1. 下载二进制包
-2. 运行
+1. 从[release](https://github.com/zdz1715/webhook/releases)下载二进制包
+2. 解压运行
+```shell
+tar -xzvf webhook-linux-amd64-v0.1.0.tar.gz 
+cd bin
+webhook --config config.yaml
+```
 
 ### docker-compose
 ```yaml
-
+version: "3.1"
+services:
+  webhook:
+    image: zdzserver/webhook:v0.1.0
+    container_name: webhook
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config/config.yaml:/user/local/webhook/config/config.yaml
+    networks:
+      webhook:
+networks:
+  webhook:
 ```
 
 ### kubernetes
