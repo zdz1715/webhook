@@ -31,10 +31,24 @@ type ReqInfo struct {
 	Header http.Header `json:"header"`
 }
 
+type Req struct {
+	URL string `form:"url"`
+}
+
 func Handle(c *gin.Context) {
 	uuid := strings.ToLower(c.Param("uuid"))
 	webhooks := config.Init().Webhooks
 	webhook, ok := webhooks[uuid]
+
+	wReq := &Req{}
+
+	_ = c.BindQuery(wReq)
+
+	fmt.Println(wReq)
+
+	if len(wReq.URL) > 0 {
+		webhook.URL = wReq.URL
+	}
 
 	loggerInfo := global.WebhookLogger.Info().
 		Str(middleware.ReqIDKey, middleware.GetReqID(c)).

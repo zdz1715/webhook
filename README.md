@@ -41,6 +41,16 @@ networks:
 
 ```
 
+## 接口列表
+### /webhook/:uuid
+- HTTP请求方式： `GET POST `
+#### 请求参数（query）
+
+| 参数     | 必填  | 类型          | 说明            |
+|--------|-----|-------------|---------------|
+| url    | 否   | string      | 覆盖配置文件的`url`  |
+
+
 ## 自定义消息格式
 模版参考：https://pkg.go.dev/text/template
 
