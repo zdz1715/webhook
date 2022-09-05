@@ -29,6 +29,7 @@ services:
       - /user/local/webhook/config/config.yaml
     volumes:
       - ./config/config.yaml:/user/local/webhook/config/config.yaml
+      - ./log:/user/local/webhook/log
     networks:
       webhook:
 networks:

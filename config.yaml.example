@@ -12,8 +12,8 @@ log:
   dir: "./log" # log dir
   rotate: # log rotate
     # maxSize and maxBackups = 0, File permanent saving
-    maxSize: 0 # MB, single file max size
-    maxBackups: 0 # file max backups
+    maxSize: 100 # MB, single file max size
+    maxBackups: 10 # file max backups
 # webhooks
 ## template docs: https://pkg.go.dev/text/template
 webhooks:
