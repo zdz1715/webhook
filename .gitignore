@@ -1,5 +1,5 @@
 .idea
 ./config.yaml
 log
-./bin/*
+bin
 config.yaml
