@@ -44,10 +44,10 @@ func Handle(c *gin.Context) {
 
 	_ = c.BindQuery(wReq)
 
-	fmt.Println(wReq)
-
 	if len(wReq.URL) > 0 {
-		webhook.URL = wReq.URL
+		webhook.URL = strings.TrimFunc(wReq.URL, func(r rune) bool {
+			return r == '"' || r == '\''
+		})
 	}
 
 	loggerInfo := global.WebhookLogger.Info().
@@ -191,9 +191,9 @@ func makeBody(c *gin.Context, webhook *config.Webhook, vars engine.Vars) (string
 		}
 	case util.JsonContentType:
 		if len(webhook.Body.Json) > 0 {
-			fmt.Println("json----", webhook.Body.Json)
+			fmt.Println("[json]", webhook.Body.Json)
 			strBody = parseVarString(c, webhook.Body.Json, vars)
-			fmt.Println("json parse----", strBody)
+			fmt.Println("[json parse]", strBody)
 			var jsonObj interface{}
 			err := json.Unmarshal([]byte(strBody), &jsonObj)
 			if err != nil {
