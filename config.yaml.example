@@ -42,7 +42,7 @@ webhooks:
         key: "url"
         from: "Body"
     body:
-      json: '{"msgtype":"markdown","at":{"atMobiles":[]},"markdown":{"title":"sentry报警","text":"# sentry报警\n---\n## {{ .project_name }}\n- **level:** {{ .event.level }} \n- **错误标题:** {{ .event.title }}\n- **错误信息:** {{ .culprit }}\n- **用户信息:** {{ .event.user.username }} - {{ .event.user.id }}\n- **用户代理:** {{ .event.contexts.device.model }} {{ .event.contexts.os.name }} {{ .event.contexts.os.version }} - {{ .event.contexts.browser.name }}  {{ .event.contexts.browser.version }}\n\n--- \n[查看详情]({{ .url }})\n"}}'
+      json: '{"msgtype":"actionCard","at":{"atMobiles":[]},"btnOrientation":"0","actionCard":{"title":"sentry报警","text":"# sentry报警 [{{ .event.environment }}]\n---\n### {{ .project_name }} \n- **level:** {{ .event.level }} \n- **错误标题:** {{ .event.title }}\n- **错误信息:** {{ .culprit }}\n- **用户信息:** {{ .event.user.username }} - {{ .event.user.id }}\n- **用户代理:** {{ .event.contexts.device.model }} {{ .event.contexts.os.name }} {{ .event.contexts.os.version }} - {{ .event.contexts.browser.name }}  {{ .event.contexts.browser.version }}\n","btns":[{"title":"查看详情","actionURL":"{{ .url }}"}]}}'
 #      form:
 #        key1: value1
 #        key2: value2
