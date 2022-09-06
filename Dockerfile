@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM zdzserver/runtime:alpine3.16
 
 WORKDIR /user/local/webhook
 

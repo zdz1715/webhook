@@ -24,6 +24,8 @@ services:
     container_name: webhook
     ports:
       - "8000:8000"
+    environment:
+      TZ: "Asia/Shanghai" 
     command:
       - -c
       - /user/local/webhook/config/config.yaml
