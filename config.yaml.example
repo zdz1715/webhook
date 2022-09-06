@@ -23,14 +23,14 @@ webhooks:
     contentType: application/json # default: application/json
     #    query: # add query
     #      - name: "project"
-    #        value: "project is {{ .project }}"
+    #        value: "project is {{ .project_name }}"
     #    header: # add header
     #      - name: "x-sentry-project"
-    #        value: "{{ .project }}"
+    #        value: "{{ .project_name }}"
     # var.*.from: Query, Body, Header, Value. default: Value
     vars: # not support case sensitive keys: docs: https://github.com/spf13/viper#does-viper-support-case-sensitive-keys
       project_name:
-        key: "project_name"
+        key: "project_name" # If it is JSON data, eg: project_name event.event_id event.user.id
         from: "Body"
       event:
         key: "event"
