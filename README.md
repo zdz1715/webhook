@@ -57,6 +57,10 @@ networks:
 
 支持函数：https://masterminds.github.io/sprig/
 
+### 额外函数
+- `urlEncode`: encode url
+- `urlDecode`: decode url
+
 
 
 
