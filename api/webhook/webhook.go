@@ -53,6 +53,7 @@ func Handle(c *gin.Context) {
 	loggerInfo := global.WebhookLogger.Info().
 		Str(middleware.ReqIDKey, middleware.GetReqID(c)).
 		Str("webhook_uuid", uuid)
+
 	loggerError := global.WebhookLogger.Error().
 		Str(middleware.ReqIDKey, middleware.GetReqID(c)).
 		Str("webhook_uuid", uuid)
@@ -178,7 +179,6 @@ func makeBody(c *gin.Context, webhook *config.Webhook, vars engine.Vars) (string
 		reqBody io.Reader
 		strBody string
 	)
-	fmt.Println(webhook.Body)
 	switch webhook.ContentType {
 	case util.FormContentType:
 		if len(webhook.Body.Form) > 0 {
@@ -191,13 +191,11 @@ func makeBody(c *gin.Context, webhook *config.Webhook, vars engine.Vars) (string
 		}
 	case util.JsonContentType:
 		if len(webhook.Body.Json) > 0 {
-			fmt.Println("[json]", webhook.Body.Json)
 			strBody = parseVarString(c, webhook.Body.Json, vars)
-			fmt.Println("[json parse]", strBody)
 			var jsonObj interface{}
 			err := json.Unmarshal([]byte(strBody), &jsonObj)
 			if err != nil {
-				return strBody, reqBody, fmt.Errorf("body.json unmarshal failed: %s", err.Error())
+				return strBody, reqBody, fmt.Errorf("body.json unmarshal failed: %s, json: %s, json parse: %s", err.Error(), webhook.Body.Json, strBody)
 			}
 			reqBody = strings.NewReader(strBody)
 		}

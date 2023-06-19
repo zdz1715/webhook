@@ -23,7 +23,6 @@ func Init() *gin.Engine {
 
 	global.AccessLogger = util.NewMultiLevelWriter(
 		util.NewRotate(accessLogPath, cfg.Log.Rotate.MaxSize, cfg.Log.Rotate.MaxBackups),
-		os.Stdout,
 	)
 
 	global.WebhookLogger = util.NewLogRotate(webhookLogPath, cfg.Log.Rotate.MaxSize, cfg.Log.Rotate.MaxBackups)
