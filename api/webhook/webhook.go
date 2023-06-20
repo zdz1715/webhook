@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"github.com/thedevsaddam/gojsonq/v2"
 	"github.com/zdz1715/webhook/config"
 	"github.com/zdz1715/webhook/global"
@@ -17,6 +18,8 @@ import (
 	"net/url"
 	"strings"
 )
+
+var jsonParse = gojsonq.New()
 
 type RespInfo struct {
 	Status       string      `json:"status"`
@@ -94,7 +97,7 @@ func Handle(c *gin.Context) {
 
 	strBody, body, err := makeBody(c, &webhook, vars)
 	if err != nil {
-		loggerError.Msg(err.Error())
+		loggerError.Str("json str", strBody).Msg(err.Error())
 		c.JSON(http.StatusOK, &util.Response{Code: http.StatusBadRequest, Message: err.Error()})
 		return
 	}
@@ -168,7 +171,7 @@ func sendRequest(req *http.Request, client *config.Client) (*RespInfo, error) {
 func parseVarString(c *gin.Context, text string, vars engine.Vars) string {
 	v, err := global.Engine.Render(text, vars)
 	if err != nil {
-		_ = c.Error(err)
+		log.Error().Str(middleware.ReqIDKey, middleware.GetReqID(c)).Msg(err.Error())
 		return text
 	}
 	return v
@@ -191,11 +194,21 @@ func makeBody(c *gin.Context, webhook *config.Webhook, vars engine.Vars) (string
 		}
 	case util.JsonContentType:
 		if len(webhook.Body.Json) > 0 {
-			strBody = parseVarString(c, webhook.Body.Json, vars)
-			var jsonObj interface{}
-			err := json.Unmarshal([]byte(strBody), &jsonObj)
+			var bJson interface{}
+			err := json.Unmarshal([]byte(webhook.Body.Json), &bJson)
 			if err != nil {
-				return strBody, reqBody, fmt.Errorf("body.json unmarshal failed: %s, json: %s, json parse: %s", err.Error(), webhook.Body.Json, strBody)
+				return "", reqBody, fmt.Errorf("config body.json unmarshal failed: %s", err.Error())
+			}
+			bJsonByte, err := json.Marshal(bJson)
+			if err != nil {
+				return "", reqBody, fmt.Errorf("config body.json marshal failed: %s", err.Error())
+			}
+			bJsonStr := string(bJsonByte)
+			strBody = parseVarString(c, bJsonStr, vars)
+			var jsonObj interface{}
+			err = json.Unmarshal([]byte(strBody), &jsonObj)
+			if err != nil {
+				return strBody, reqBody, fmt.Errorf("body.json after parse unmarshal failed: %s", err.Error())
 			}
 			reqBody = strings.NewReader(strBody)
 		}
@@ -250,7 +263,7 @@ func bindVars(webhook *config.Webhook, c *gin.Context, body []byte) engine.Vars 
 		case config.WebhookVarFromBody:
 			switch c.ContentType() {
 			case util.JsonContentType:
-				data[nameTrim] = gojsonq.New().FromString(bodyStr).Find(key)
+				data[nameTrim] = jsonParse.FromString(bodyStr).Find(key)
 			default:
 				data[nameTrim] = c.PostForm(key)
 			}
