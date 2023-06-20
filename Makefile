@@ -113,6 +113,6 @@ image: build ## build image
 
 
 .PHONY: push
-push: docker ## Push docker image with the manager.
+push:  ## Push docker image with the manager.
 	@echo "push image to $(IMG_REGISTRY):$(VERSION)"
 	docker push $(IMG_REGISTRY):$(VERSION)
